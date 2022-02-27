@@ -26,14 +26,20 @@ func (s *myScene) Setup(u engo.Updater) {
 	world.AddSystem(&common.RenderSystem{})
 	world.AddSystem(&common.MouseSystem{})
 
+	kbs := common.NewKeyboardScroller(400, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis)
+	world.AddSystem(kbs)
+	world.AddSystem(&common.EdgeScroller{ScrollSpeed: 400, EdgeMargin: 20})
+	world.AddSystem(&common.MouseZoomer{ZoomSpeed: -0.125})
+
 	world.AddSystem(&systems.CityBuildingSystem{})
 }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:  "Hello World",
-		Width:  400,
-		Height: 400,
+		Title:          "Hello World",
+		Width:          400,
+		Height:         400,
+		StandardInputs: true,
 	}
 	engo.Run(opts, &myScene{})
 }
