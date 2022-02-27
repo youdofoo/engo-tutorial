@@ -29,7 +29,7 @@ func (s *myScene) Type() string { return "myGame" }
 
 func (s *myScene) Preload() {
 	log.Println(engo.Files.GetRoot())
-	engo.Files.Load("textures/city.png", "tilemap/TrafficMap.tmx")
+	engo.Files.Load("textures/citySheet.png", "tilemap/TrafficMap.tmx")
 }
 
 func (s *myScene) Setup(u engo.Updater) {
@@ -60,7 +60,7 @@ func (s *myScene) Setup(u engo.Updater) {
 		Repeat:   common.Repeat,
 	}
 	hud.RenderComponent.SetShader(common.HUDShader)
-	hud.RenderComponent.SetZIndex(1)
+	hud.RenderComponent.SetZIndex(1000)
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
 		case *common.RenderSystem:
