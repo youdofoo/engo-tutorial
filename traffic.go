@@ -17,13 +17,19 @@ type HUD struct {
 	common.SpaceComponent
 }
 
+type Tile struct {
+	ecs.BasicEntity
+	common.RenderComponent
+	common.SpaceComponent
+}
+
 type myScene struct{}
 
 func (s *myScene) Type() string { return "myGame" }
 
 func (s *myScene) Preload() {
 	log.Println(engo.Files.GetRoot())
-	engo.Files.Load("textures/city.png")
+	engo.Files.Load("textures/city.png", "tilemap/TrafficMap.tmx")
 }
 
 func (s *myScene) Setup(u engo.Updater) {
@@ -59,6 +65,38 @@ func (s *myScene) Setup(u engo.Updater) {
 		switch sys := system.(type) {
 		case *common.RenderSystem:
 			sys.Add(&hud.BasicEntity, &hud.RenderComponent, &hud.SpaceComponent)
+		}
+	}
+
+	resource, err := engo.Files.Resource("tilemap/TrafficMap.tmx")
+	if err != nil {
+		panic(err)
+	}
+	tmxResource := resource.(common.TMXResource)
+	levelData := tmxResource.Level
+	tiles := make([]*Tile, 0)
+	for _, tileLayer := range levelData.TileLayers {
+		for _, tileElement := range tileLayer.Tiles {
+			tile := &Tile{BasicEntity: ecs.NewBasic()}
+			tile.RenderComponent = common.RenderComponent{
+				Drawable: tileElement.Image,
+				Scale:    engo.Point{X: 1, Y: 1},
+			}
+			tile.SpaceComponent = common.SpaceComponent{
+				Position: tileElement.Point,
+				Width:    0,
+				Height:   0,
+			}
+			tiles = append(tiles, tile)
+		}
+	}
+	common.CameraBounds = levelData.Bounds()
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			for _, v := range tiles {
+				sys.Add(&v.BasicEntity, &v.RenderComponent, &v.SpaceComponent)
+			}
 		}
 	}
 
