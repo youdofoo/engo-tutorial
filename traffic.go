@@ -7,13 +7,8 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+	"github.com/youdofoo/engo-tutorial/systems"
 )
-
-type City struct {
-	ecs.BasicEntity
-	common.RenderComponent
-	common.SpaceComponent
-}
 
 type myScene struct{}
 
@@ -26,32 +21,12 @@ func (s *myScene) Preload() {
 
 func (s *myScene) Setup(u engo.Updater) {
 	world, _ := u.(*ecs.World)
-	world.AddSystem(&common.RenderSystem{})
-
-	city := City{BasicEntity: ecs.NewBasic()}
-	city.SpaceComponent = common.SpaceComponent{
-		Position: engo.Point{X: 10, Y: 10},
-		Width:    303,
-		Height:   641,
-	}
-
-	texture, err := common.LoadedSprite("textures/city.png")
-	if err != nil {
-		log.Printf("Unable to load texture: %v", err)
-	}
-	city.RenderComponent = common.RenderComponent{
-		Drawable: texture,
-		Scale:    engo.Point{X: 1, Y: 1},
-	}
-
+	engo.Input.RegisterButton("AddCity", engo.KeyF1)
 	common.SetBackground(color.White)
+	world.AddSystem(&common.RenderSystem{})
+	world.AddSystem(&common.MouseSystem{})
 
-	for _, system := range world.Systems() {
-		switch sys := system.(type) {
-		case *common.RenderSystem:
-			sys.Add(&city.BasicEntity, &city.RenderComponent, &city.SpaceComponent)
-		}
-	}
+	world.AddSystem(&systems.CityBuildingSystem{})
 }
 
 func main() {
